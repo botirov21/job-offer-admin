@@ -34,6 +34,9 @@ import AutorenewRoundedIcon from "@mui/icons-material/AutorenewRounded";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded";
+import Popup from "reactjs-popup";
+
+
 
 const rows = [
   {
@@ -261,27 +264,8 @@ function stableSort<T>(
   return stabilizedThis.map((el) => el[0]);
 }
 
-function RowMenu() {
-  return (
-    <Dropdown>
-      <MenuButton
-        slots={{ root: IconButton }}
-        slotProps={{ root: { variant: "plain", color: "neutral", size: "sm" } }}
-      >
-        <MoreHorizRoundedIcon />
-      </MenuButton>
-      <Menu size="sm" sx={{ minWidth: 140 }}>
-        <MenuItem>Edit</MenuItem>
-        <MenuItem>Rename</MenuItem>
-        <MenuItem>Move</MenuItem>
-        <Divider />
-        <MenuItem color="danger">Delete</MenuItem>
-      </Menu>
-    </Dropdown>
-  );
-}
 interface Job {
-  id: number;
+  _id: string;
   name: string;
   location: string;
   experience: string;
@@ -290,10 +274,12 @@ interface Job {
   employmentType: string;
   salary: string;
 }
+
 const BASEURL = "http://localhost:5050/api/v1";
 export default function OrderTable() {
   const [open, setOpen] = React.useState(false);
   const [allData, setAllData] = React.useState<Job[]>([]);
+  const [openEdit, setOpenEdit] = React.useState<boolean>(false);
   React.useEffect(() => {
     const fetchData = async () => {
       try {
@@ -306,6 +292,45 @@ export default function OrderTable() {
     };
     fetchData();
   }, []);
+
+  //For Delete Data
+  const handleDeleteClick = async (_id: string) => {
+    try {
+      const response = await fetch(`${BASEURL}/jobs/${_id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setAllData((prevJobs) => prevJobs.filter((job) => job._id !== _id)); // Update allData
+      } else {
+        throw new Error(
+          `Delete request failed with status: ${response.status}`
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting job:", error); // Updated resource name
+      // Handle the error appropriately
+    }
+  };
+
+  //For Update Data
+  const handleUpdateClick = async (_id: string, updatedMotor: Partial<Job>) => {
+    try {
+      const response = await fetch(`${BASEURL}/jobs/${_id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json", // Fix the typo here
+        },
+        body: JSON.stringify(updatedMotor),
+      });
+      if (response.ok) {
+        const updatedMotor = (await response.json()) as Job; // Ensure expected response type
+        setOpenEdit(false);
+      }
+    } catch (error) {
+      console.error;
+    }
+  };
   const renderFilters = () => (
     <React.Fragment>
       <FormControl size="sm">
@@ -418,7 +443,7 @@ export default function OrderTable() {
           overflow: "auto",
           minHeight: 0,
         }}
-      > 
+      >
         <Table
           aria-labelledby="tableTitle"
           stickyHeader
@@ -437,57 +462,90 @@ export default function OrderTable() {
             <tr>
               <th
                 style={{ width: 48, textAlign: "center", padding: "12px 6px" }}
-              >
-              </th>
+              ></th>
               <th style={{ width: 140, padding: "12px 6px" }}>Name</th>
               <th style={{ width: 140, padding: "12px 6px" }}>Location</th>
               <th style={{ width: 140, padding: "12px 6px" }}>Experience</th>
               <th style={{ width: 140, padding: "12px 6px" }}>Education</th>
-              <th style={{ width: 140, padding: "12px 6px" }}>Corporate Type</th>
-              <th style={{ width: 140, padding: "12px 6px" }}>Employment Type</th>
+              <th style={{ width: 140, padding: "12px 6px" }}>
+                Corporate Type
+              </th>
+              <th style={{ width: 140, padding: "12px 6px" }}>
+                Employment Type
+              </th>
               <th style={{ width: 140, padding: "12px 6px" }}>Salary</th>
               <th style={{ width: 140, padding: "12px 6px" }}> </th>
             </tr>
           </thead>
           <tbody>
-              {allData.map((row) => (
-                <tr key={row.id}>
-                  <td style={{ textAlign: "center", width: 120 }}>
+            {allData.map((data) => (
+ 
+                <tr key={data._id}>
+                  
+                  <td style={{ textAlign: "center", width: 120 }}></td>
+                  <td>
+                    <Typography level="body-xs">{data.name}</Typography>
                   </td>
                   <td>
-                    <Typography level="body-xs">{row.name}</Typography>
+                    <Typography level="body-xs">{data.location}</Typography>
                   </td>
                   <td>
-                    <Typography level="body-xs">{row.location}</Typography>
+                    <Typography level="body-xs">{data.experience}</Typography>
                   </td>
                   <td>
-                    <Typography level="body-xs">{row.experience}</Typography>
+                    <Typography level="body-xs">{data.education}</Typography>
                   </td>
                   <td>
-                    <Typography level="body-xs">{row.education}</Typography>
+                    <Typography level="body-xs">
+                      {data.corporateType}
+                    </Typography>
                   </td>
                   <td>
-                    <Typography level="body-xs">{row.corporateType}</Typography>
+                    <Typography level="body-xs">
+                      {data.employmentType}
+                    </Typography>
                   </td>
                   <td>
-                    <Typography level="body-xs">{row.employmentType}</Typography>
-                  </td>
-                  <td>
-                    <Typography level="body-xs">{row.salary}</Typography>
+                    <Typography level="body-xs">{data.salary}</Typography>
                   </td>
                   <td>
                     <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                       <Link level="body-xs" component="button">
                         Download
                       </Link>
-                      <RowMenu />
+                      <Dropdown>
+                        <MenuButton
+                          slots={{ root: IconButton }}
+                          slotProps={{
+                            root: {
+                              variant: "plain",
+                              color: "neutral",
+                              size: "sm",
+                            },
+                          }}
+                        >
+                          <MoreHorizRoundedIcon />
+                        </MenuButton>
+                        <Menu size="sm" sx={{ minWidth: 140 }}>
+                          <MenuItem>Edit</MenuItem>
+                          <MenuItem
+                            onClick={() => handleDeleteClick(data._id)}
+                            color="danger"
+                          >
+                            Delete
+                          </MenuItem>
+                          <Divider />
+                        </Menu>
+                      </Dropdown>
                     </Box>
                   </td>
                 </tr>
-              ))}
+              
+            ))}
           </tbody>
         </Table>
       </Sheet>
+
       <Box
         className="Pagination-laptopUp"
         sx={{
