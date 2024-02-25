@@ -12,9 +12,9 @@ import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 
 import Sidebar from './components/Sidebar';
-import OrderTable from './components/OrderTable';
 import OrderList from './components/OrderList';
 import Header from './components/Header';
+import OrderTableq from './components/OrderTable';
 
 export default function JoyOrderDashboardTemplate() {
   return (
@@ -93,7 +93,7 @@ export default function JoyOrderDashboardTemplate() {
               Download PDF
             </Button>
           </Box>
-          <OrderTable />
+          <OrderTableq />
           <OrderList />
         </Box>
       </Box>
