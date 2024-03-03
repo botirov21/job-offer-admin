@@ -3,15 +3,13 @@ import Box from "@mui/joy/Box";
 import Divider from "@mui/joy/Divider";
 import Table from "@mui/joy/Table";
 import Sheet from "@mui/joy/Sheet";
-import IconButton, { iconButtonClasses } from "@mui/joy/IconButton";
+import IconButton from "@mui/joy/IconButton";
 import Typography from "@mui/joy/Typography";
 import Menu from "@mui/joy/Menu";
 import MenuButton from "@mui/joy/MenuButton";
 import MenuItem from "@mui/joy/MenuItem";
 import Dropdown from "@mui/joy/Dropdown";
 import SearchIcon from "@mui/icons-material/Search";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded";
 import Button from "@mui/joy/Button";
 import FormControl from "@mui/joy/FormControl";
@@ -32,12 +30,18 @@ interface Job {
   corporateType: string;
   employmentType: string;
   salary: string;
+  jobPosition: string;
+  role: string;
+  responsibilities: string;
+  idealCandidate: string;
 }
 
-const BASEURL = "http://localhost:5050/api/v1/";
+const BASEURL = "https://api-job-offer.isabek.uz/api/v1/";
 export default function OrderTable() {
   const [openAddModal, setOpenAddModal] = React.useState<boolean>(false);
-  const [openEditModal, setOpenEditModal] = React.useState<boolean>(false);
+  const [openAllRole, setOpenAllRole] = React.useState<string | null>(null);
+  const [openAllRes, setopenAllRes] = React.useState<string | null>(null);
+  const [openAllIdeal, setopenAllIdeal] = React.useState<string | null>(null);
   const [allData, setAllData] = React.useState<Job[]>([]);
   const [name, setName] = React.useState<string>("");
   const [location, setLocation] = React.useState<string>("");
@@ -47,7 +51,10 @@ export default function OrderTable() {
   const [employmentType, setEmploymentType] = React.useState<string>("");
   const [salary, setSalary] = React.useState<string>("");
   const [searchQuery, setSearchQuery] = React.useState<string>("");
-
+  const [jobPosition, setJobPosition] = React.useState<string>("");
+  const [role, setRole] = React.useState<string>("");
+  const [responsibilities, setResponsibilities] = React.useState<string>("");
+  const [idealCandidate, setIdealCandidate] = React.useState<string>("");
 
   // Function to fetch all data
   const fetchData = async () => {
@@ -59,12 +66,11 @@ export default function OrderTable() {
       console.log("Job data is wrong:", error);
     }
   };
-  
-// Fuction to search data from datas
-  const filteredData = allData.filter((data) =>
-  data.name.toLowerCase().includes(searchQuery.toLowerCase()),
-);
 
+  // Fuction to search data from datas
+  const filteredData = allData.filter((data) =>
+    data.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Fetching all data on component mount
   React.useEffect(() => {
@@ -87,6 +93,10 @@ export default function OrderTable() {
           corporateType,
           employmentType,
           salary,
+          jobPosition,
+          role,
+          responsibilities,
+          idealCandidate,
         } as Job),
       });
 
@@ -125,51 +135,6 @@ export default function OrderTable() {
     }
   };
 
-  // Function to updating of data
-const handleUpdate = async (_id: string) => {
-  try {
-    const response = await fetch(`${BASEURL}jobs/${_id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        location,
-        experience,
-        education,
-        corporateType,
-        employmentType,
-        salary,
-      } as Job),
-    });
-    if (response.ok) {
-      // Update the specific job in allData with the new data
-      setAllData(prevData =>
-        prevData.map(job => {
-          if (job._id === _id) {
-            return {
-              ...job,
-              name,
-              location,
-              experience,
-              education,
-              corporateType,
-              employmentType,
-              salary,
-            };
-          }
-          return job;
-        })
-      );
-      setOpenEditModal(false); // Close the edit modal
-    }
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-
   return (
     <React.Fragment>
       <Box
@@ -178,6 +143,7 @@ const handleUpdate = async (_id: string) => {
           borderRadius: "sm",
           py: 2,
           display: { xs: "none", sm: "flex" },
+          alignItems: "end",
           flexWrap: "wrap",
           gap: 1.5,
           "& > *": {
@@ -202,8 +168,9 @@ const handleUpdate = async (_id: string) => {
           color="neutral"
           startDecorator={<Add />}
           onClick={() => setOpenAddModal(true)}
+          sx={{height: "35px"}}
         >
-          Add new job title
+          Add new job 
         </Button>
       </Box>
       <Modal open={openAddModal} onClose={() => setOpenAddModal(false)}>
@@ -215,7 +182,9 @@ const handleUpdate = async (_id: string) => {
               handleAdd();
             }}
           >
-            <Stack spacing={2} sx={{ p: 2 }}>
+            <Stack spacing={2} sx={{ p: 2, display: "flex"}}>
+              <div style={{display: "flex", gap: "40px"}}>
+                <div>
               <FormControl>
                 <FormLabel>Name</FormLabel>
                 <Input
@@ -266,16 +235,8 @@ const handleUpdate = async (_id: string) => {
                   required
                 />
               </FormControl>
-              <FormControl>
-                <FormLabel>Employment Type</FormLabel>
-                <Input
-                  placeholder="Employment type"
-                  value={employmentType}
-                  onChange={(e) => setEmploymentType(e.target.value)}
-                  autoFocus
-                  required
-                />
-              </FormControl>
+              </div>
+              <div>
               <FormControl>
                 <FormLabel>Salary</FormLabel>
                 <Input
@@ -286,7 +247,59 @@ const handleUpdate = async (_id: string) => {
                   required
                 />
               </FormControl>
-              <Button type="submit">Add</Button>
+              <FormControl>
+                <FormLabel>Job Position</FormLabel>
+                <Input
+                  placeholder="Job Position"
+                  value={jobPosition}
+                  onChange={(e) => setJobPosition(e.target.value)}
+                  autoFocus
+                  required
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Role</FormLabel>
+                <Input
+                  placeholder="Role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  autoFocus
+                  required
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Responsibilities</FormLabel>
+                <Input
+                  placeholder="Responsibilities"
+                  value={responsibilities}
+                  onChange={(e) => setResponsibilities(e.target.value)}
+                  autoFocus
+                  required
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Ideal Candidate</FormLabel>
+                <Input
+                  placeholder="Ideal Candidate"
+                  value={idealCandidate}
+                  onChange={(e) => setIdealCandidate(e.target.value)}
+                  autoFocus
+                  required
+                />
+              </FormControl>
+              </div>
+            </div>
+            <FormControl>
+                <FormLabel>Employment Type</FormLabel>
+                <Input
+                  placeholder="Employment type"
+                  value={employmentType}
+                  onChange={(e) => setEmploymentType(e.target.value)}
+                  autoFocus
+                  required
+                />
+              </FormControl>
+            <Button type="submit">Add</Button>
             </Stack>
           </form>
         </ModalDialog>
@@ -322,9 +335,9 @@ const handleUpdate = async (_id: string) => {
               <th
                 style={{ width: 48, textAlign: "center", padding: "12px 6px" }}
               ></th>
-              <th style={{ width: 140, padding: "12px 6px" }}>Name</th>
-              <th style={{ width: 140, padding: "12px 6px" }}>Location</th>
-              <th style={{ width: 140, padding: "12px 6px" }}>Experience</th>
+              <th style={{ width: 160, padding: "12px 6px" }}>Name</th>
+              <th style={{ width: 100, padding: "12px 6px" }}>Location</th>
+              <th style={{ width: 100, padding: "12px 6px" }}>Experience</th>
               <th style={{ width: 140, padding: "12px 6px" }}>Education</th>
               <th style={{ width: 140, padding: "12px 6px" }}>
                 Corporate Type
@@ -333,7 +346,15 @@ const handleUpdate = async (_id: string) => {
                 Employment Type
               </th>
               <th style={{ width: 140, padding: "12px 6px" }}>Salary</th>
-              <th style={{ width: 140, padding: "12px 6px" }}>Tools</th>
+              <th style={{ width: 100, padding: "12px 6px" }}>Job Positon</th>
+              <th style={{ width: 140, padding: "12px 6px" }}>Role</th>
+              <th style={{ width: 140, padding: "12px 6px" }}>
+                Responsibilities
+              </th>
+              <th style={{ width: 140, padding: "12px 6px" }}>
+                Ideal Candidate
+              </th>
+              <th style={{ width: 140, padding: "12px 6px" }}>Tolls</th>
             </tr>
           </thead>
           <tbody>
@@ -362,6 +383,74 @@ const handleUpdate = async (_id: string) => {
                   <Typography level="body-xs">{data.salary}</Typography>
                 </td>
                 <td>
+                  <Typography level="body-xs">{data.jobPosition}</Typography>
+                </td>
+                <td>
+                  <Typography
+                    level="body-xs"
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "start",
+                    }}
+                  >
+                    {data.role.length > 20
+                      ? data.role.substring(0, 20)
+                      : data.role}
+                    <button
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setOpenAllRole(data._id)}
+                    >
+                      more..
+                    </button>
+                  </Typography>
+                </td>
+                <td>
+                  <Typography
+                    level="body-xs"
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "start",
+                    }}
+                  >
+                    {data.responsibilities.length > 20
+                      ? data.responsibilities.substring(0, 20) + "..."
+                      : data.responsibilities}
+                    <button
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setopenAllRes(data._id)}
+                    >
+                      more..
+                    </button>
+                  </Typography>
+                </td>
+                <td>
+                  <Typography level="body-xs">
+                    {data.idealCandidate.length > 20
+                      ? data.idealCandidate.substring(0, 20) + "..."
+                      : data.idealCandidate}
+                    <button
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setopenAllIdeal(data._id)}
+                    >
+                      more..
+                    </button>
+                  </Typography>{" "}
+                </td>
+                <td>
                   <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                     <Dropdown>
                       <MenuButton
@@ -378,21 +467,6 @@ const handleUpdate = async (_id: string) => {
                       </MenuButton>
                       <Menu size="sm" sx={{ minWidth: 140 }}>
                         <MenuItem
-                          onClick={() => {
-                            setName(data.name);
-                            setLocation(data.location);
-                            setExperience(data.experience);
-                            setEducation(data.education);
-                            setCorporateType(data.corporateType);
-                            setEmploymentType(data.employmentType);
-                            setSalary(data.salary);
-                            setOpenEditModal(true);
-                          }}
-                        >
-                          Edit
-                        </MenuItem>
-
-                        <MenuItem
                           onClick={() => handleDelete(data._id)}
                           color="danger"
                         >
@@ -401,121 +475,57 @@ const handleUpdate = async (_id: string) => {
                         <Divider />
                       </Menu>
                     </Dropdown>
-                    <Sheet>
-                      <Modal
-                        open={openEditModal}
-                        onClose={() => setOpenEditModal(false)}
-                      >
-                        <ModalDialog>
-                          <DialogTitle>Edit Information</DialogTitle>
-                          <form
-                            onSubmit={(
-                              event: React.FormEvent<HTMLFormElement>
-                            ) => {
-                              event.preventDefault();
-                              handleUpdate(data._id);
-                            }}
-                          >
-                            <Stack spacing={2} sx={{ p: 2 }}>
-                              <FormControl>
-                                <FormLabel>Name</FormLabel>
-                                <Input
-                                  placeholder="Name"
-                                  value={name}
-                                  onChange={(e) => setName(e.target.value)}
-                                  autoFocus
-                                  required
-                                />
-                              </FormControl>
-                              <FormControl>
-                                <FormLabel>Location</FormLabel>
-                                <Input
-                                  placeholder="Location"
-                                  value={location}
-                                  onChange={(e) => setLocation(e.target.value)}
-                                  autoFocus
-                                  required
-                                />
-                              </FormControl>
-                              <FormControl>
-                                <FormLabel>Experience</FormLabel>
-                                <Input
-                                  placeholder="Experience"
-                                  value={experience}
-                                  onChange={(e) =>
-                                    setExperience(e.target.value)
-                                  }
-                                  autoFocus
-                                  required
-                                />
-                              </FormControl>
-                              <FormControl>
-                                <FormLabel>Education</FormLabel>
-                                <Input
-                                  placeholder="Education"
-                                  value={education}
-                                  onChange={(e) => setEducation(e.target.value)}
-                                  autoFocus
-                                  required
-                                />
-                              </FormControl>
-                              <FormControl>
-                                <FormLabel>Corporate Type</FormLabel>
-                                <Input
-                                  placeholder="Corporate Type"
-                                  value={corporateType}
-                                  onChange={(e) =>
-                                    setCorporateType(e.target.value)
-                                  }
-                                  autoFocus
-                                  required
-                                />
-                              </FormControl>
-                              <FormControl>
-                                <FormLabel>Employment Type</FormLabel>
-                                <Input
-                                  placeholder="Employment type"
-                                  value={employmentType}
-                                  onChange={(e) =>
-                                    setEmploymentType(e.target.value)
-                                  }
-                                  autoFocus
-                                  required
-                                />
-                              </FormControl>
-                              <FormControl>
-                                <FormLabel>Salary</FormLabel>
-                                <Input
-                                  placeholder="Salary"
-                                  value={salary}
-                                  onChange={(e) => setSalary(e.target.value)}
-                                  autoFocus
-                                  required
-                                />
-                              </FormControl>
-                              <Button type="submit" color="success">
-                                Edit
-                              </Button>
-                              <Button
-                                onClick={() => {
-                                  setOpenEditModal(false);
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                            </Stack>
-                          </form>
-                        </ModalDialog>
-                      </Modal>
-                    </Sheet>
                   </Box>
                 </td>
+                <Modal
+                  open={openAllRole === data._id}
+                  onClose={() => setOpenAllRole(null)}
+                >
+                  <ModalDialog>
+                    <p>{data.role}</p>
+                  </ModalDialog>
+                </Modal>
+                <Modal
+                  open={openAllRes === data._id}
+                  onClose={() => setopenAllRes(null)}
+                >
+                  <ModalDialog>
+                    {data.responsibilities && (
+                      <>
+                        <Typography>Responsibilities:</Typography>
+                        <ul style={{ marginTop: "3px" }}>
+                          {data.responsibilities
+                            .split(".")
+                            .map((responsibility, index) => (
+                              <li
+                                style={{
+                                  fontFamily: "Outfit",
+                                  fontWeight: "300",
+                                }}
+                                key={index}
+                              >
+                                {responsibility.trim()}
+                              </li>
+                            ))}
+                        </ul>
+                      </>
+                    )}
+                  </ModalDialog>
+                </Modal>
+                <Modal
+                  open={openAllIdeal === data._id}
+                  onClose={() => setopenAllIdeal(null)}
+                >
+                  <ModalDialog>
+                    <p>{data.idealCandidate}</p>
+                  </ModalDialog>
+                </Modal>
               </tr>
             ))}
           </tbody>
         </Table>
       </Sheet>
-      <Box
+      {/* <Box
         className="Pagination-laptopUp"
         sx={{
           pt: 2,
@@ -557,7 +567,7 @@ const handleUpdate = async (_id: string) => {
         >
           Next
         </Button>
-      </Box>
+      </Box> */}
     </React.Fragment>
   );
 }

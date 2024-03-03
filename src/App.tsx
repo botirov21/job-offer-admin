@@ -1,20 +1,14 @@
-import * as React from 'react';
 import { CssVarsProvider } from '@mui/joy/styles';
 import CssBaseline from '@mui/joy/CssBaseline';
 import Box from '@mui/joy/Box';
-import Button from '@mui/joy/Button';
 import Breadcrumbs from '@mui/joy/Breadcrumbs';
-import Link from '@mui/joy/Link';
 import Typography from '@mui/joy/Typography';
-
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
-import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
-
 import Sidebar from './components/Sidebar';
 import OrderList from './components/OrderList';
 import Header from './components/Header';
-import OrderTableq from './components/OrderTable';
+import OrderTable from './components/OrderTable';
 
 export default function JoyOrderDashboardTemplate() {
   return (
@@ -49,23 +43,7 @@ export default function JoyOrderDashboardTemplate() {
               separator={<ChevronRightRoundedIcon  />}
               sx={{ pl: 0 }}
             >
-              <Link
-                underline="none"
-                color="neutral"
-                href="#some-link"
-                aria-label="Home"
-              >
-                <HomeRoundedIcon />
-              </Link>
-              <Link
-                underline="hover"
-                color="neutral"
-                href="#some-link"
-                fontSize={12}
-                fontWeight={500}
-              >
-                Dashboard
-              </Link>
+              <HomeRoundedIcon />
               <Typography color="primary" fontWeight={500} fontSize={12}>
                 Offers
               </Typography>
@@ -85,15 +63,8 @@ export default function JoyOrderDashboardTemplate() {
             <Typography level="h2" component="h1">
               Offers
             </Typography>
-            <Button
-              color="primary"
-              startDecorator={<DownloadRoundedIcon />}
-              size="sm"
-            >
-              Download PDF
-            </Button>
           </Box>
-          <OrderTableq />
+          <OrderTable/>
           <OrderList />
         </Box>
       </Box>
